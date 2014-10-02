@@ -1,9 +1,14 @@
 import unittest
 from autocode.parser import autocode_line
 
+    # TODO: TAPEB
+
+    # TODO: Special print prefixes
+
+    # TODO: Bracketed Interludes
+
 
 class ParserTest(unittest.TestCase):
-    # TODO: TAPEB
 
     def test_parses_tape_statements(self):
         self.assertTrue(autocode_line.parse('line','TAPE') is not None)
@@ -57,11 +62,11 @@ class ParserTest(unittest.TestCase):
         self.assertTrue(autocode_line.parse('line','vn7 = vn1 + vn5') is not None)
 
     def test_parses_functions(self):
-        self.assertTrue(autocode_line.parse('line','v1 = MOD 5.0') is not None)
-        self.assertTrue(autocode_line.parse('line','v1 = -MOD 5.0') is not None)
         self.assertTrue(autocode_line.parse('line','v1 = MOD v2') is not None)
         self.assertTrue(autocode_line.parse('line','v1 = -MOD v2') is not None)
+        self.assertTrue(autocode_line.parse('line','v1 = INT 5.6') is not None)
         self.assertTrue(autocode_line.parse('line','v1 = INT v2') is not None)
+        self.assertTrue(autocode_line.parse('line','v1 = -INT v2') is not None)
         self.assertTrue(autocode_line.parse('line','v1 = FRAC v2') is not None)
         self.assertTrue(autocode_line.parse('line','v1 = SQRT v2') is not None)
         self.assertTrue(autocode_line.parse('line','v1 = SIN v2') is not None)
@@ -96,11 +101,6 @@ class ParserTest(unittest.TestCase):
         self.assertTrue(autocode_line.parse('line','^0, n2 = -3') is not None) # using ^ instead of ->
         self.assertTrue(autocode_line.parse('line','^0, v1 =* v3') is not None) # using ^ instead of ->
         self.assertTrue(autocode_line.parse('line','^(-4 +n8), v1 =* v3') is not None) # using ^ instead of ->
-
-
-    # TODO: Special print prefixes
-
-    # TODO: Bracketed Interludes
 
 
 
