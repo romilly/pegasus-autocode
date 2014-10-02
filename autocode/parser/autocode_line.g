@@ -10,11 +10,12 @@ parser AutocodeLineParser:
     token function: 'MOD|INT|FRAC|SQRT|SIN|COS|TAN|CSC|SEC|COT|ARCSIN|ARCCOS|ARCTAN|LOG|EXPM|EXP'
     token plus: '\+'
     token var: 'v'
+    token special_printing: 'XP|X|SP|S'
     token prt: 'PRINT'
+    token tapes: 'TAPE[B]?'
     token tape: 'TAPE'
     token spec: '[0-9]{4}'
     token label: '[1-9][0-9]?\)'
-    token directive: 'D|T'
     token negate: '-'
     token div: '/'
     token op: '\+|-|x|/'
@@ -28,9 +29,9 @@ parser AutocodeLineParser:
     token stop: 'STOP'
     token compare: '>=|>|\\=\*|\\=|=\*|='
     rule line:
-        ( directive |
+      [lparen]  [special_printing] (
         label statement |
-        statement ) EOL {{ return 'OK' }}
+        statement ) [rparen] EOL {{ return 'OK' }}
     rule statement: ( assignment | print_statement | tape_statement | stop | jump )
     rule print_statement: prt ( index | variable ) ',' ( spec | index)
     rule tape_statement: tape                                              # autocode manual sec 3.11
@@ -39,7 +40,7 @@ parser AutocodeLineParser:
     rule modifier: lparen [negate] integer plus index rparen
     rule int_assignment: index gets ( tape_spec | int_expression )
     rule var_assignment: variable gets ( tape_spec | var_expression )
-    rule tape_spec: tape [tape_qualifier]
+    rule tape_spec: tapes [tape_qualifier]
     rule tape_qualifier: ( index | star )
     rule var_expression: variable [var_tail] | [negate] ( int_val [ div int_val ] | float | function var_val )
     rule int_val: index | integer
@@ -49,4 +50,4 @@ parser AutocodeLineParser:
     rule int_op: op | star
     rule int_tail: int_op (index | integer)
     rule jump: goto ( int_val | modifier) [',' condition]
-    rule condition: [negate] (var_val | int_val) compare [negate] (var_val | int_val)
+    rule condition: [negate] ( (var_val compare [negate] var_val ) | ( int_val compare [negate] int_val) )

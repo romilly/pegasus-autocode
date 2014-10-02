@@ -1,13 +1,6 @@
 import unittest
 from autocode.parser import autocode_line
 
-    # TODO: TAPEB
-
-    # TODO: Special print prefixes
-
-    # TODO: Bracketed Interludes
-
-
 class ParserTest(unittest.TestCase):
 
     def test_parses_tape_statements(self):
@@ -18,6 +11,7 @@ class ParserTest(unittest.TestCase):
         self.assertTrue(autocode_line.parse('line','v3 = TAPE') is not None)
         self.assertTrue(autocode_line.parse('line','v3 = TAPE n2') is not None)
         self.assertTrue(autocode_line.parse('line','v3 = TAPE *') is not None)
+        self.assertTrue(autocode_line.parse('line','n7 = TAPEB') is not None)
 
     def test_parses_integer_assignments(self):
         self.assertTrue(autocode_line.parse('line','n1 = 5') is not None)
@@ -87,20 +81,35 @@ class ParserTest(unittest.TestCase):
     def test_parses_stop(self):
         self.assertTrue(autocode_line.parse('line','STOP') is not None)
 
+   # using ^ instead of ->
+
     def test_parses_jump_instructions(self):
-        self.assertTrue(autocode_line.parse('line','^0') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^n1') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^0, v2 > v3') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^0, v2 > 3.0') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^0, -v2 > 3.0') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^0, v2 > -3.0') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^0, n2 > -3') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^0, n2 = -3') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^0, n2 = -3') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^0, n2 = -3') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^0, n2 = -3') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^0, v1 =* v3') is not None) # using ^ instead of ->
-        self.assertTrue(autocode_line.parse('line','^(-4 +n8), v1 =* v3') is not None) # using ^ instead of ->
+        self.assertTrue(autocode_line.parse('line','^0') is not None)
+        self.assertTrue(autocode_line.parse('line','^n1') is not None)
+        self.assertTrue(autocode_line.parse('line','^0, v2 > v3') is not None)
+        self.assertTrue(autocode_line.parse('line','^0, v2 > 3.0') is not None)
+        self.assertTrue(autocode_line.parse('line','^0, -v2 > 3.0') is not None)
+        self.assertTrue(autocode_line.parse('line','^0, v2 > -3.0') is not None)
+        self.assertTrue(autocode_line.parse('line','^0, n2 > -3') is not None)
+        self.assertTrue(autocode_line.parse('line','^0, n2 = -3') is not None)
+        self.assertTrue(autocode_line.parse('line','^0, n2 = -3') is not None)
+        self.assertTrue(autocode_line.parse('line','^0, n2 = -3') is not None)
+        self.assertTrue(autocode_line.parse('line','^0, n2 = -3') is not None)
+        self.assertTrue(autocode_line.parse('line','^0, v1 =* v3') is not None)
+        self.assertTrue(autocode_line.parse('line','^(-4 +n8), v1 =* v3') is not None)
+
+    def test_processes_print_prefixes(self):
+        self.assertTrue(autocode_line.parse('line','XP n1 = MOD n2') is not None)
+        self.assertTrue(autocode_line.parse('line','X n1 = MOD n2') is not None)
+        self.assertTrue(autocode_line.parse('line','SP n1 = MOD n2') is not None)
+        self.assertTrue(autocode_line.parse('line','S n1 = MOD n2') is not None)
+
+    def test_parses_bracketed_interludes(self):
+        self.assertTrue(autocode_line.parse('line','(^0)') is not None)
+        self.assertTrue(autocode_line.parse('line','^0)') is not None)
+        self.assertTrue(autocode_line.parse('line','(v1 = 5.0') is not None)
+
+
 
 
 
