@@ -1,4 +1,4 @@
-from ast import Integer, Index, Modifier, IndexAssignment, operation
+from ast import Integer, Index, Modifier, IndexAssignment, Negated, operation
 
 %%
 
@@ -38,8 +38,8 @@ parser AutocodeLineParser:
     rule variable: 'v' variable_selector
     rule variable_selector:   ( integer {{ return integer }} | index {{ return index }} |
         modifier {{ return modifier }} )
-    rule modifier: {{ negate = None }} lparen [negate] integer plus index rparen
-            {{ return Modifier(negate, integer, index) }}
+    rule modifier: {{ neg = False }} lparen [negate {{neg = True }} ] integer plus index rparen
+            {{ return Modifier(integer if not neg else Negated(integer), index) }}
     rule index_assignment: index gets ( tape_spec |
         int_expression  {{ return IndexAssignment(index, int_expression) }} )
     rule var_assignment: variable gets ( tape_spec | var_expression )
@@ -49,7 +49,11 @@ parser AutocodeLineParser:
     rule int_val: index {{ return index }} | integer {{ return integer }}
     rule var_tail: op ( integer | float | variable)
     rule var_val: variable | float
-    rule int_expression: {{ is_op = False }} index [iop int_val {{ is_op = True}} ] {{ return operation(iop, index, int_val) if is_op else index }}| [negate] ( integer {{ return integer }} | mod ( variable | index ) | variable)
+    rule int_expression: {{ is_op = False }} index [iop int_val {{ is_op = True}} ]
+        {{ return operation(iop, index, int_val) if is_op else index }} |
+        {{ is_negated = False }} [negate {{ is_negated = True }}] int_negatable
+            {{ return Negated(int_negatable) if is_negated else int_negatable }}
+    rule int_negatable:  ( integer {{ return integer }} | mod ( variable | index ) | variable)
     rule iop: op {{ return op }}| star {{ return star }}
     rule jump: goto ( int_val | modifier) [',' condition]
     rule condition: [negate] ( (var_val compare [negate] var_val ) | ( int_val compare [negate] int_val) )

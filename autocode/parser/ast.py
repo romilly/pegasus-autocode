@@ -1,5 +1,5 @@
 def operation(op, left, right):
-    return {'+':Plus,'-':Minus,'x':Times}[op](left, right)
+    return {'+':Plus,'-':Minus,'x':Times,'*':Mod}[op](left, right)
 
 
 class Element():
@@ -13,8 +13,7 @@ class Element():
 
 
 class Modifier(Element):
-    def __init__(self, negated, integer, index):
-        self.negated = negated
+    def __init__(self, integer, index):
         self.integer = integer
         self.index = index
 
@@ -43,6 +42,11 @@ class IndexAssignment(Element):
         self.index = index
         self.value = value
 
+class Negated(Element):
+    def __init__(self, value):
+        self.value = value
+
+
 class Plus(Element):
    def __init__(self, left, right):
        self.left = left
@@ -59,3 +63,10 @@ class Times(Element):
     def __init__(self, left, right):
        self.left = left
        self.right = right
+
+class Mod(Element):
+    def __init__(self, left, right):
+       self.left = left
+       self.right = right
+
+
