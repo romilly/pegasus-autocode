@@ -1,20 +1,27 @@
-__author__ = 'romilly'
+def operation(op, left, right):
+    return {'+':Plus,'-':Minus,'x':Times}[op](left, right)
 
 
-class SimpleIndex():
-    def __init__(self, name):
-        self.number = int(name[1:])
+class Element():
+    def __ne__(self, other):
+        return not self == other
 
-    def __repr__(self):
-        return 'n%d' % self.number
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return self.__dict__ == other.__dict__
 
-class Label():
-    def __init__(self, label):
-        self.number = int(label[:-1])
 
-class Integer():
+class Modifier(Element):
+    def __init__(self, negated, integer, index):
+        self.negated = negated
+        self.integer = integer
+        self.index = index
+
+
+class Integer(Element):
     def __init__(self, value):
-        self.value = value
+        self.value = int(value)
 
     def evaluate_in(self, context):
         return self.value
@@ -23,28 +30,32 @@ class Integer():
         return str(self.value)
 
 
-class Program():
-    def __init__(self):
-        self.directives = []
-        self.statements = []
-        self.labels = {0: 0}
-
-    def append_directive(self, directive):
-        self.directives.append(directive)
-
-    def append(self, statement):
-        self.statements.append(statement)
-
-    def append_labelled(self, label, statement):
-        self.labels[label] = len(self.statements)
-        self.statements.append(statement)
-
-
-class Assignment():
-    def __init__(self, target, value):
-        self.target = target
+class Index(Element):
+    def __init__(self, value):
         self.value = value
 
-    def __repr__(self):
-        return '= '.join([repr(self.target), repr(self.value)])
+    def __hash__(self):
+        return hash(self.value)
 
+
+class IndexAssignment(Element):
+    def __init__(self, index, value):
+        self.index = index
+        self.value = value
+
+class Plus(Element):
+   def __init__(self, left, right):
+       self.left = left
+       self.right = right
+
+
+class Minus(Element):
+   def __init__(self, left, right):
+       self.left = left
+       self.right = right
+
+
+class Times(Element):
+    def __init__(self, left, right):
+       self.left = left
+       self.right = right
