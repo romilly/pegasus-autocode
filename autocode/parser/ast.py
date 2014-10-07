@@ -1,5 +1,5 @@
 def operation(op, left, right):
-    return {'+':Plus,'-':Minus,'x':Times,'*':Mod}[op](left, right)
+    return {'+':Plus,'-':Minus,'x':Times,'*':Remainder}[op](left, right)
 
 
 class Element():
@@ -33,9 +33,6 @@ class Index(Element):
     def __init__(self, value):
         self.value = value
 
-    def __hash__(self):
-        return hash(self.value)
-
 
 class IndexAssignment(Element):
     def __init__(self, index, value):
@@ -64,9 +61,30 @@ class Times(Element):
        self.left = left
        self.right = right
 
-class Mod(Element):
+
+class Remainder(Element):
     def __init__(self, left, right):
        self.left = left
        self.right = right
+
+
+class ReadProgramTape(Element):
+    pass
+
+
+class ReadDataTape(Element):
+    def __init__(self, qualifier, reader):
+        self.qualifier = qualifier
+        self.reader = reader
+
+
+class MultipleIndexAssignment(Element):
+    def __init__(self, index, value):
+        self.index = index
+        self.value = value
+
+class MaxInt(Element):
+    pass
+
 
 

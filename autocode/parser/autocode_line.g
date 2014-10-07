@@ -1,4 +1,4 @@
-from ast import Integer, Index, Modifier, IndexAssignment, Negated, operation
+from ast import *
 
 %%
 
@@ -33,18 +33,19 @@ parser AutocodeLineParser:
         statement ) [rparen] EOL {{ return 'OK' }}
     rule statement: ( assignment | print_statement | tape_statement | stop | jump )
     rule print_statement: prt ( index | variable ) ',' ( spec | index)
-    rule tape_statement: tape                                              # autocode manual sec 3.11
+    rule tape_statement: tape {{ return ReadProgramTape() }}                                 # autocode manual sec 3.11
     rule assignment: index_assignment |  var_assignment
     rule variable: 'v' variable_selector
     rule variable_selector:   ( integer {{ return integer }} | index {{ return index }} |
         modifier {{ return modifier }} )
     rule modifier: {{ neg = False }} lparen [negate {{neg = True }} ] integer plus index rparen
             {{ return Modifier(integer if not neg else Negated(integer), index) }}
-    rule index_assignment: index gets ( tape_spec |
+    rule index_assignment: index gets ( tape_spec {{ return MultipleIndexAssignment(index, tape_spec) }} |
         int_expression  {{ return IndexAssignment(index, int_expression) }} )
     rule var_assignment: variable gets ( tape_spec | var_expression )
-    rule tape_spec: tapes [tape_qualifier]
-    rule tape_qualifier: ( index | star )
+    rule tape_spec: {{ qualifier = '' }} tapes [tape_qualifier {{ qualifier = tape_qualifier }} ]
+            {{ return ReadDataTape(qualifier, tapes) }}
+    rule tape_qualifier: ( index {{ return index }}  | star {{ return MaxInt() }} )
     rule var_expression: variable [var_tail] | [negate] ( int_val [ div int_val ] | float | function var_val )
     rule int_val: index {{ return index }} | integer {{ return integer }}
     rule var_tail: op ( integer | float | variable)
