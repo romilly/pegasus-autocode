@@ -30,14 +30,17 @@ class Integer(Element):
 
 
 class Index(Element):
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, name):
+        self.name = name
 
 
 class IndexAssignment(Element):
     def __init__(self, index, value):
         self.index = index
         self.value = value
+
+    def execute_in(self, context):
+        context.set(self.index.name, self.value.evaluate_in(context))
 
 class Negated(Element):
     def __init__(self, value):
@@ -83,8 +86,20 @@ class MultipleIndexAssignment(Element):
         self.index = index
         self.value = value
 
+
 class MaxInt(Element):
-    pass
+    def evaluate_in(self, context):
+        return 8192 # largest index in autocode!
+
+
+class Variable(Element):
+    def __init__(self, id):
+        self.id = id
+
+class Print(Element):
+    def __init__(self, value, format):
+        self.value = value
+        self.format = format
 
 
 

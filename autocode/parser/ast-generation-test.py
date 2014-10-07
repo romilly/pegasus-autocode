@@ -1,6 +1,6 @@
 import unittest
 from autocode.parser import autocode_line
-from autocode.parser.ast import *
+from autocode.ast.ast import *
 
 
 class AstGenerationTest(unittest.TestCase):
@@ -38,5 +38,11 @@ class AstGenerationTest(unittest.TestCase):
         # self.check('index_assignment','v3 = TAPE')
         # self.check('index_assignment','v3 = TAPE n2')
         # self.check('index_assignment','v3 = TAPE *')
+
+    def test_parses_print_statements(self):
+        self.check('print_statement','PRINT v7, 3016', Print(Variable(Integer(7)),Integer(3016)))
+        self.check('print_statement', 'PRINT n3, 4000', Print(Index('n3'), Integer(4000)))
+        self.check('print_statement', 'PRINT v7, n3', Print(Variable(Integer(7)), Index('n3')))
+        self.check('print_statement', 'PRINT vn7, 3236', Print(Variable(Index('n7')), Integer(3236)))
 
 

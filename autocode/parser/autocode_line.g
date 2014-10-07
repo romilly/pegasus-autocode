@@ -1,4 +1,4 @@
-from ast import *
+from autocode.ast.ast import *
 
 %%
 
@@ -32,10 +32,12 @@ parser AutocodeLineParser:
         label statement |
         statement ) [rparen] EOL {{ return 'OK' }}
     rule statement: ( assignment | print_statement | tape_statement | stop | jump )
-    rule print_statement: prt ( index | variable ) ',' ( spec | index)
+    rule print_statement: prt (  index {{ source = index }}  | variable {{ source = variable }} )
+            ',' ( spec {{ format = Integer(spec) }} | index {{ format = index }} )
+            {{ return Print(source, format) }}
     rule tape_statement: tape {{ return ReadProgramTape() }}                                 # autocode manual sec 3.11
     rule assignment: index_assignment |  var_assignment
-    rule variable: 'v' variable_selector
+    rule variable: 'v' variable_selector {{ return Variable(variable_selector) }}
     rule variable_selector:   ( integer {{ return integer }} | index {{ return index }} |
         modifier {{ return modifier }} )
     rule modifier: {{ neg = False }} lparen [negate {{neg = True }} ] integer plus index rparen
