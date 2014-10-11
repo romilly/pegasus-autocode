@@ -16,7 +16,7 @@ class ParserTest(unittest.TestCase):
         self.try_to_parse('v3 = TAPE *') 
         self.try_to_parse('n7 = TAPEB') 
 
-    def test_parses_integer_assignments(self):
+    def test_parses_index_assignments(self):
         self.try_to_parse('n1 = 5') 
         self.try_to_parse('n1 = -5') 
         self.try_to_parse('n1 = n2') 
@@ -33,22 +33,23 @@ class ParserTest(unittest.TestCase):
         self.try_to_parse('PRINT vn7, 3236') 
 
     def test_parses_variable_assignments(self):
-        self.try_to_parse('v1 = 5.0') 
+        self.try_to_parse('v1 = 5.0')
         self.try_to_parse('v1 = -5.0') 
         self.try_to_parse('v1 = 5') 
         self.try_to_parse('v1 = v3') 
         self.try_to_parse('v1 = v3 + 5') 
         self.try_to_parse('v1 = v3 + 5') 
-        self.try_to_parse('v1 = v3 x 5.0') 
+        self.try_to_parse('v1 = v3 x 5.0')
+        self.try_to_parse('v1 = v3 / v2')
 
     def test_parses_mixed_assignments(self):
-        self.try_to_parse('n1 = v2') 
-        self.try_to_parse('n1 = -v2') 
-        self.try_to_parse('v1 = n2') 
-        self.try_to_parse('v1 = n2/n3') 
-        self.try_to_parse('v1 = 2/n3') 
-        self.try_to_parse('v1 = 2/3') 
-        self.try_to_parse('v1 = n2/3') 
+        self.try_to_parse('n1 = v2')
+        self.try_to_parse('n1 = -v2')
+        self.try_to_parse('v1 = n2')
+        self.try_to_parse('v1 = n2 / n3')
+        self.try_to_parse('v1 = 2/n3')
+        self.try_to_parse('v1 = 2/3')
+        self.try_to_parse('v1 = n2/3')
 
 
     def test_parses_modification(self):

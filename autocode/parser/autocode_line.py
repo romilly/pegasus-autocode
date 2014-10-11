@@ -21,10 +21,10 @@ class AutocodeLineParserScanner(runtime.Scanner):
         ('spec', re.compile('[0-9]{4}')),
         ('label', re.compile('[1-9][0-9]?\\)')),
         ('negate', re.compile('-')),
+        ('op3', re.compile('\\+|-|x')),
         ('div', re.compile('/')),
-        ('op', re.compile('\\+|-|x|/')),
         ('plus', re.compile('\\+')),
-        ('float', re.compile('[0-9]*\\.[0-9]*')),
+        ('FLOAT', re.compile('[0-9]*\\.[0-9]+')),
         ('INT', re.compile('[0-9]{1,4}')),
         ('gets', re.compile('=')),
         ('star', re.compile('\\*')),
@@ -45,16 +45,23 @@ class AutocodeLineParser(runtime.Parser):
             lparen = self._scan('lparen', context=_context)
         if self._peek('special_printing', 'label', 'stop', 'prt', 'tape', 'goto', "'v'", 'INDEX', context=_context) == 'special_printing':
             special_printing = self._scan('special_printing', context=_context)
-        _token = self._peek('label', 'stop', 'prt', 'tape', 'goto', "'v'", 'INDEX', context=_context)
-        if _token == 'label':
+        if self._peek('label', 'stop', 'prt', 'tape', 'goto', "'v'", 'INDEX', context=_context) == 'label':
             label = self._scan('label', context=_context)
-            statement = self.statement(_context)
-        else: # in ['stop', 'prt', 'tape', 'goto', "'v'", 'INDEX']
-            statement = self.statement(_context)
+        statement = self.statement(_context)
         if self._peek('rparen', 'EOL', context=_context) == 'rparen':
             rparen = self._scan('rparen', context=_context)
         EOL = self._scan('EOL', context=_context)
         return 'OK'
+
+    def op(self, _parent=None):
+        _context = self.Context(_parent, self._scanner, 'op', [])
+        _token = self._peek('op3', 'div', context=_context)
+        if _token == 'op3':
+            op3 = self._scan('op3', context=_context)
+            return op3
+        else: # == 'div'
+            div = self._scan('div', context=_context)
+            return div
 
     def statement(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'statement', [])
@@ -101,7 +108,7 @@ class AutocodeLineParser(runtime.Parser):
         if _token == 'INDEX':
             index_assignment = self.index_assignment(_context)
         else: # == "'v'"
-            var_assignment = self.var_assignment(_context)
+            variable_assignment = self.variable_assignment(_context)
 
     def variable(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'variable', [])
@@ -147,21 +154,23 @@ class AutocodeLineParser(runtime.Parser):
             int_expression = self.int_expression(_context)
             return IndexAssignment(index, int_expression)
 
-    def var_assignment(self, _parent=None):
-        _context = self.Context(_parent, self._scanner, 'var_assignment', [])
+    def variable_assignment(self, _parent=None):
+        _context = self.Context(_parent, self._scanner, 'variable_assignment', [])
         variable = self.variable(_context)
         gets = self._scan('gets', context=_context)
-        _token = self._peek('tapes', "'v'", 'negate', 'float', 'function', 'INDEX', 'INT', context=_context)
+        _token = self._peek('tapes', 'negate', "'v'", 'function', 'FLOAT', 'rparen', 'INDEX', 'INT', 'EOL', 'compare', 'div', "','", 'gets', 'op3', 'star', context=_context)
         if _token == 'tapes':
             tape_spec = self.tape_spec(_context)
-        else: # in ["'v'", 'negate', 'float', 'function', 'INDEX', 'INT']
+            return MultipleVariableAssignment(variable, tape_spec)
+        else:
             var_expression = self.var_expression(_context)
+            return VariableAssignment(variable, var_expression)
 
     def tape_spec(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'tape_spec', [])
         qualifier = ''
         tapes = self._scan('tapes', context=_context)
-        if self._peek('star', 'INDEX', 'div', 'plus', 'gets', 'compare', 'op', "','", 'rparen', 'EOL', context=_context) in ['star', 'INDEX']:
+        if self._peek('star', 'INDEX', 'rparen', 'EOL', 'compare', 'div', "','", 'gets', 'op3', context=_context) in ['star', 'INDEX']:
             tape_qualifier = self.tape_qualifier(_context)
             qualifier = tape_qualifier
         return ReadDataTape(qualifier, tapes)
@@ -178,25 +187,40 @@ class AutocodeLineParser(runtime.Parser):
 
     def var_expression(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'var_expression', [])
-        _token = self._peek("'v'", 'negate', 'float', 'function', 'INDEX', 'INT', context=_context)
-        if _token == "'v'":
-            variable = self.variable(_context)
-            if self._peek('op', 'plus', 'gets', 'div', 'compare', 'rparen', "','", 'star', 'EOL', context=_context) == 'op':
-                var_tail = self.var_tail(_context)
-        else: # in ['negate', 'float', 'function', 'INDEX', 'INT']
-            if self._peek('negate', 'float', 'function', 'INDEX', 'INT', context=_context) == 'negate':
-                negate = self._scan('negate', context=_context)
-            _token = self._peek('float', 'function', 'INDEX', 'INT', context=_context)
-            if _token not in ['float', 'function']:
+        neg = False
+        if self._peek('negate', "'v'", 'function', 'FLOAT', 'INDEX', 'INT', 'rparen', 'EOL', 'compare', 'div', "','", 'gets', 'op3', 'star', context=_context) == 'negate':
+            negate = self._scan('negate', context=_context)
+            neg=True
+        var_negatable = self.var_negatable(_context)
+        return Negated(var_negatable) if neg else var_negatable
+
+    def var_negatable(self, _parent=None):
+        _context = self.Context(_parent, self._scanner, 'var_negatable', [])
+        _token = self._peek("'v'", 'function', 'FLOAT', 'INDEX', 'INT', 'rparen', 'EOL', 'compare', 'div', "','", 'gets', 'op3', 'star', context=_context)
+        if _token in ['INDEX', 'INT']:
+            int_val = self.int_val(_context)
+            has_div = False; i = int_val
+            if self._peek('div', 'rparen', 'EOL', 'compare', "','", 'gets', 'op3', 'star', context=_context) == 'div':
+                div = self._scan('div', context=_context)
                 int_val = self.int_val(_context)
-                if self._peek('div', 'compare', "','", 'gets', 'op', 'plus', 'rparen', 'star', 'EOL', context=_context) == 'div':
-                    div = self._scan('div', context=_context)
-                    int_val = self.int_val(_context)
-            elif _token == 'float':
-                float = self._scan('float', context=_context)
-            else: # == 'function'
-                function = self._scan('function', context=_context)
+                has_div = True
+            return Div(i, int_val) if has_div else i
+        elif _token == "'v'":
+            is_op = False
+            variable = self.variable(_context)
+            if self._peek('op3', 'div', 'rparen', 'EOL', 'compare', "','", 'gets', 'star', context=_context) in ['op3', 'div']:
+                op = self.op(_context)
                 var_val = self.var_val(_context)
+                is_op = True
+            return operation(op, variable, var_val) if is_op else variable
+        elif _token not in ['function', 'FLOAT']:
+            pass
+        elif _token == 'FLOAT':
+            float = self.float(_context)
+            return float
+        else: # == 'function'
+            function = self._scan('function', context=_context)
+            var_val = self.var_val(_context)
 
     def int_val(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'int_val', [])
@@ -208,24 +232,28 @@ class AutocodeLineParser(runtime.Parser):
             integer = self.integer(_context)
             return integer
 
-    def var_tail(self, _parent=None):
-        _context = self.Context(_parent, self._scanner, 'var_tail', [])
-        op = self._scan('op', context=_context)
-        _token = self._peek('float', "'v'", 'INT', context=_context)
-        if _token == 'INT':
-            integer = self.integer(_context)
-        elif _token == 'float':
-            float = self._scan('float', context=_context)
-        else: # == "'v'"
-            variable = self.variable(_context)
-
     def var_val(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'var_val', [])
-        _token = self._peek("'v'", 'float', context=_context)
+        _token = self._peek("'v'", 'FLOAT', 'INT', context=_context)
         if _token == "'v'":
             variable = self.variable(_context)
-        else: # == 'float'
-            float = self._scan('float', context=_context)
+            return variable
+        elif _token == 'FLOAT':
+            float = self.float(_context)
+            return float
+        else: # == 'INT'
+            integer = self.integer(_context)
+            return integer
+
+    def float_val(self, _parent=None):
+        _context = self.Context(_parent, self._scanner, 'float_val', [])
+        _token = self._peek("'v'", 'FLOAT', context=_context)
+        if _token == "'v'":
+            variable = self.variable(_context)
+            return variable
+        else: # == 'FLOAT'
+            float = self.float(_context)
+            return float
 
     def int_expression(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'int_expression', [])
@@ -233,11 +261,11 @@ class AutocodeLineParser(runtime.Parser):
         if _token == 'INDEX':
             is_op = False
             index = self.index(_context)
-            if self._peek('op', 'star', 'rparen', 'div', 'EOL', 'gets', 'compare', 'plus', "','", context=_context) in ['op', 'star']:
+            if self._peek('op3', 'star', 'rparen', 'EOL', 'compare', 'div', "','", 'gets', context=_context) in ['op3', 'star']:
                 iop = self.iop(_context)
                 int_val = self.int_val(_context)
                 is_op = True
-            return operation(iop, index, int_val) if is_op else index
+            return ioperation(iop, index, int_val) if is_op else index
         else: # in ['negate', 'mod', "'v'", 'INT']
             is_negated = False
             if self._peek('negate', 'mod', "'v'", 'INT', context=_context) == 'negate':
@@ -261,13 +289,14 @@ class AutocodeLineParser(runtime.Parser):
                 index = self.index(_context)
         else: # == "'v'"
             variable = self.variable(_context)
+            return variable
 
     def iop(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'iop', [])
-        _token = self._peek('op', 'star', context=_context)
-        if _token == 'op':
-            op = self._scan('op', context=_context)
-            return op
+        _token = self._peek('op3', 'star', context=_context)
+        if _token == 'op3':
+            op3 = self._scan('op3', context=_context)
+            return op3
         else: # == 'star'
             star = self._scan('star', context=_context)
             return star
@@ -280,27 +309,32 @@ class AutocodeLineParser(runtime.Parser):
             int_val = self.int_val(_context)
         else: # == 'lparen'
             modifier = self.modifier(_context)
-        if self._peek("','", 'gets', 'compare', 'div', 'op', 'plus', 'rparen', 'EOL', 'star', context=_context) == "','":
+        if self._peek("','", 'compare', 'rparen', 'div', 'EOL', 'gets', 'op3', 'star', context=_context) == "','":
             self._scan("','", context=_context)
             condition = self.condition(_context)
 
     def condition(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'condition', [])
-        if self._peek('negate', "'v'", 'float', 'INDEX', 'INT', context=_context) == 'negate':
+        if self._peek('negate', "'v'", 'FLOAT', 'INDEX', 'INT', context=_context) == 'negate':
             negate = self._scan('negate', context=_context)
-        _token = self._peek("'v'", 'float', 'INDEX', 'INT', context=_context)
+        _token = self._peek("'v'", 'FLOAT', 'INDEX', 'INT', context=_context)
         if _token not in ['INDEX', 'INT']:
-            var_val = self.var_val(_context)
+            float_val = self.float_val(_context)
             compare = self._scan('compare', context=_context)
-            if self._peek('negate', "'v'", 'float', context=_context) == 'negate':
+            if self._peek('negate', "'v'", 'FLOAT', context=_context) == 'negate':
                 negate = self._scan('negate', context=_context)
-            var_val = self.var_val(_context)
+            float_val = self.float_val(_context)
         else: # in ['INDEX', 'INT']
             int_val = self.int_val(_context)
             compare = self._scan('compare', context=_context)
             if self._peek('negate', 'INDEX', 'INT', context=_context) == 'negate':
                 negate = self._scan('negate', context=_context)
             int_val = self.int_val(_context)
+
+    def float(self, _parent=None):
+        _context = self.Context(_parent, self._scanner, 'float', [])
+        FLOAT = self._scan('FLOAT', context=_context)
+        return Float(FLOAT)
 
     def integer(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'integer', [])
