@@ -1,4 +1,5 @@
 from autocode.ast.ast import *
+from autocode.ast.functions import *
 
 %%
 
@@ -42,7 +43,7 @@ parser AutocodeLineParser:
     rule variable_selector:   ( integer {{ return integer }} | index {{ return index }} |
         modifier {{ return modifier }} )
     rule modifier: {{ neg = False }} lparen [negate {{neg = True }} ] integer plus index rparen
-            {{ return Modifier(integer if not neg else Negated(integer), index) }}
+            {{ return Plus(integer if not neg else Negated(integer), index) }}
     rule index_assignment: index gets ( tape_spec {{ return MultipleIndexAssignment(index, tape_spec) }} |
         int_expression  {{ return IndexAssignment(index, int_expression) }} )
     rule variable_assignment: variable gets ( tape_spec {{ return MultipleVariableAssignment(variable, tape_spec) }} |
@@ -57,7 +58,7 @@ parser AutocodeLineParser:
         {{ return Div(i, int_val) if has_div else i }} |
          {{ is_op = False }} variable [ op var_val {{ is_op = True}} ]
        {{ return operation(op, variable, var_val) if is_op else variable }} |
-        | float {{ return float }} | function var_val )
+        | float {{ return float }} | function var_val {{ return fun(function, var_val) }} )
     rule int_val: index {{ return index }} | integer {{ return integer }}
     rule var_val: variable {{ return variable }} | float {{ return float}} | integer {{return integer }}
     rule float_val: variable {{ return variable }} | float {{ return float }}

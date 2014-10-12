@@ -1,15 +1,12 @@
 import unittest
 from autocode.parser import autocode_line
 from autocode.ast.ast import *
+from autocode.ast.functions import *
 
 
 class AstGenerationTest(unittest.TestCase):
     def check(self, rule, text, expected):
          self.assertEqual(autocode_line.parse(rule, text),expected)
-
-    def test_generates_modifier(self):
-        self.check('modifier','(5 + n2)', Modifier(Integer(5), Index('n2')))
-        self.check('modifier','(-5 + n2)', Modifier(Negated(Integer(5)), Index('n2')))
 
     def test_generates_tape_statement(self):
         self.check('tape_statement','TAPE', ReadProgramTape())
@@ -38,13 +35,13 @@ class AstGenerationTest(unittest.TestCase):
         self.check('index_assignment', 'n1 = n2 * 5', IndexAssignment(Index('n1'), Remainder(Index('n2'), Integer(5))))
         self.check('index_assignment', 'n1 = n2 + n7',IndexAssignment(Index('n1'), Plus(Index('n2'), Index('n7'))))
 
-    def test_parses_print_statements(self):
+    def test_generates_print_statements(self):
         self.check('print_statement','PRINT v7, 3016', Print(Variable(Integer(7)),Integer(3016)))
         self.check('print_statement', 'PRINT n3, 4000', Print(Index('n3'), Integer(4000)))
         self.check('print_statement', 'PRINT v7, n3', Print(Variable(Integer(7)), Index('n3')))
         self.check('print_statement', 'PRINT vn7, 3236', Print(Variable(Index('n7')), Integer(3236)))
         
-    def test_parses_variable_assignments(self):
+    def test_generates_variable_assignments(self):
         self.check('variable_assignment','v1 = 5.0', VariableAssignment(Variable(Integer(1)), Float('5.0')))
         self.check('variable_assignment','v1 = -5.0', VariableAssignment(Variable(Integer(1)), Negated(Float('5.0'))))
         self.check('variable_assignment','v1 = 5', VariableAssignment(Variable(Integer(1)), Integer(5)))
@@ -58,14 +55,49 @@ class AstGenerationTest(unittest.TestCase):
         self.check('variable_assignment','v1 = v3 / v2',
                    VariableAssignment(Variable(Integer(1)), Div(Variable(Integer(3)), Variable(Integer(2)))))
         
-    def test_parses_mixed_assignments(self):
+    def test_generates_mixed_assignments(self):
         self.check('index_assignment', 'n1 = v2', IndexAssignment(Index('n1'), Variable(Integer(2))))
         self.check('index_assignment', 'n1 = -v2', IndexAssignment(Index('n1'), Negated(Variable(Integer(2)))))
         self.check('variable_assignment', 'v1 = n2', VariableAssignment(Variable(Integer(1)), Index('n2')))
         self.check('variable_assignment', 'v1 = n2 / n3',
                    VariableAssignment(Variable(Integer(1)), Div(Index('n2'),Index('n3'))))
-        # self.check('variable_assignment, 'v1 = 2/n3')
-        # self.check('variable_assignment, 'v1 = 2/3')
-        # self.check('variable_assignment, 'v1 = n2/3')
-
+        self.check('variable_assignment', 'v1 = 2/n3',
+                   VariableAssignment(Variable(Integer(1)), Div(Integer(2),Index('n3'))))
+        self.check('variable_assignment', 'v1 = 2/3',
+                    VariableAssignment(Variable(Integer(1)), Div(Integer(2),Integer(3))))
+        self.check('variable_assignment', 'v1 = n2/3',
+                    VariableAssignment(Variable(Integer(1)), Div(Index('n2'),Integer(3))))
+        
+    def test_generates_modification(self):
+        self.check('variable_assignment','vn7 = 323.6',
+                   VariableAssignment(Variable(Index('n7')),Float(323.6)))
+        self.check('variable_assignment','v(5+n7) = 323.6',
+                   VariableAssignment(Variable(Plus(Integer(5),Index('n7'))),Float(323.6)))
+        self.check('variable_assignment','v(5+n7) = v(-7+n5) + v(3+n2)',
+                   VariableAssignment(Variable(Plus(Integer(5),Index('n7'))),
+                        Plus(Variable(Plus(Negated(Integer(7)), Index('n5'))),Variable(Plus(Integer(3),Index('n2'))))))
+        
+    def test_parses_functions(self):
+        self.check('variable_assignment','v1 = MOD v2',
+                   VariableAssignment(Variable(Integer(1)),Mod(Variable(Integer(2)))))
+        # self.check('variable_assignment','v1 = -MOD v2')
+        # self.check('variable_assignment','v1 = INT 5.6')
+        # self.check('variable_assignment','v1 = INT v2')
+        # self.check('variable_assignment','v1 = -INT v2')
+        # self.check('variable_assignment','v1 = FRAC v2')
+        # self.check('variable_assignment','v1 = SQRT v2')
+        # self.check('variable_assignment','v1 = SIN v2')
+        # self.check('variable_assignment','v1 = COS v2')
+        # self.check('variable_assignment','v1 = TAN v2')
+        # self.check('variable_assignment','v1 = CSC v2')
+        # self.check('variable_assignment','v1 = SEC v2')
+        # self.check('variable_assignment','v1 = COT v2')
+        # self.check('variable_assignment','v1 = ARCSIN v2')
+        # self.check('variable_assignment','v1 = ARCCOS v2')
+        # self.check('variable_assignment','v1 = ARCTAN v2')
+        # self.check('variable_assignment','v1 = LOG v2')
+        # self.check('variable_assignment','v1 = EXP v2')
+        # self.check('variable_assignment','v1 = EXPM v2')
+        # self.check('integer_assignment','n1 = MOD n2')
+        # self.check('integer_assignment','n1 = -MOD n2')
 

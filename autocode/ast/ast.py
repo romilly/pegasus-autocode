@@ -15,12 +15,6 @@ class Element():
         return self.__dict__ == other.__dict__
 
 
-class Modifier(Element):
-    def __init__(self, integer, index):
-        self.integer = integer
-        self.index = index
-
-
 class Integer(Element):
     def __init__(self, value):
         self.value = int(value)
@@ -143,10 +137,15 @@ class VariableAssignment(Element):
         self.variable = variable
         self.value = value
 
-
 class Float(Element):
     def __init__(self, float_string):
+
         self.value = float(float_string)
+
+
+
+
+
 
 
 
