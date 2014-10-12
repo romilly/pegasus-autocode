@@ -159,7 +159,7 @@ class AutocodeLineParser(runtime.Parser):
         _context = self.Context(_parent, self._scanner, 'variable_assignment', [])
         variable = self.variable(_context)
         gets = self._scan('gets', context=_context)
-        _token = self._peek('tapes', 'negate', "'v'", 'function', 'FLOAT', 'rparen', 'INDEX', 'INT', 'EOL', 'compare', 'div', "','", 'gets', 'op3', 'star', context=_context)
+        _token = self._peek('tapes', 'negate', "'v'", 'function', 'FLOAT', 'rparen', 'INDEX', 'INT', 'EOL', 'compare', 'div', "','", 'gets', 'op3', context=_context)
         if _token == 'tapes':
             tape_spec = self.tape_spec(_context)
             return MultipleVariableAssignment(variable, tape_spec)
@@ -189,7 +189,7 @@ class AutocodeLineParser(runtime.Parser):
     def var_expression(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'var_expression', [])
         neg = False
-        if self._peek('negate', "'v'", 'function', 'FLOAT', 'INDEX', 'INT', 'rparen', 'EOL', 'compare', 'div', "','", 'gets', 'op3', 'star', context=_context) == 'negate':
+        if self._peek('negate', "'v'", 'function', 'FLOAT', 'INDEX', 'INT', 'rparen', 'EOL', 'compare', 'div', "','", 'gets', 'op3', context=_context) == 'negate':
             negate = self._scan('negate', context=_context)
             neg=True
         var_negatable = self.var_negatable(_context)
@@ -197,11 +197,11 @@ class AutocodeLineParser(runtime.Parser):
 
     def var_negatable(self, _parent=None):
         _context = self.Context(_parent, self._scanner, 'var_negatable', [])
-        _token = self._peek("'v'", 'function', 'FLOAT', 'INDEX', 'INT', 'rparen', 'EOL', 'compare', 'div', "','", 'gets', 'op3', 'star', context=_context)
+        _token = self._peek("'v'", 'function', 'FLOAT', 'INDEX', 'INT', 'rparen', 'EOL', 'compare', 'div', "','", 'gets', 'op3', context=_context)
         if _token in ['INDEX', 'INT']:
             int_val = self.int_val(_context)
             has_div = False; i = int_val
-            if self._peek('div', 'rparen', 'EOL', 'compare', "','", 'gets', 'op3', 'star', context=_context) == 'div':
+            if self._peek('div', 'rparen', 'EOL', 'compare', "','", 'gets', 'op3', context=_context) == 'div':
                 div = self._scan('div', context=_context)
                 int_val = self.int_val(_context)
                 has_div = True
@@ -209,7 +209,7 @@ class AutocodeLineParser(runtime.Parser):
         elif _token == "'v'":
             is_op = False
             variable = self.variable(_context)
-            if self._peek('op3', 'div', 'rparen', 'EOL', 'compare', "','", 'gets', 'star', context=_context) in ['op3', 'div']:
+            if self._peek('op3', 'div', 'rparen', 'EOL', 'compare', "','", 'gets', context=_context) in ['op3', 'div']:
                 op = self.op(_context)
                 var_val = self.var_val(_context)
                 is_op = True
@@ -284,11 +284,18 @@ class AutocodeLineParser(runtime.Parser):
             return integer
         elif _token == 'mod':
             mod = self._scan('mod', context=_context)
-            _token = self._peek("'v'", 'INDEX', context=_context)
-            if _token == "'v'":
-                variable = self.variable(_context)
-            else: # == 'INDEX'
-                index = self.index(_context)
+            iv = self.iv(_context)
+            return Mod(iv)
+        else: # == "'v'"
+            variable = self.variable(_context)
+            return variable
+
+    def iv(self, _parent=None):
+        _context = self.Context(_parent, self._scanner, 'iv', [])
+        _token = self._peek("'v'", 'INDEX', context=_context)
+        if _token == 'INDEX':
+            index = self.index(_context)
+            return index
         else: # == "'v'"
             variable = self.variable(_context)
             return variable
@@ -311,7 +318,7 @@ class AutocodeLineParser(runtime.Parser):
             int_val = self.int_val(_context)
         else: # == 'lparen'
             modifier = self.modifier(_context)
-        if self._peek("','", 'compare', 'rparen', 'div', 'EOL', 'gets', 'op3', 'star', context=_context) == "','":
+        if self._peek("','", 'compare', 'rparen', 'div', 'EOL', 'gets', 'op3', context=_context) == "','":
             self._scan("','", context=_context)
             condition = self.condition(_context)
 

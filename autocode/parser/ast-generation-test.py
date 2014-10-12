@@ -80,24 +80,16 @@ class AstGenerationTest(unittest.TestCase):
     def test_parses_functions(self):
         self.check('variable_assignment','v1 = MOD v2',
                    VariableAssignment(Variable(Integer(1)),Mod(Variable(Integer(2)))))
-        # self.check('variable_assignment','v1 = -MOD v2')
-        # self.check('variable_assignment','v1 = INT 5.6')
-        # self.check('variable_assignment','v1 = INT v2')
-        # self.check('variable_assignment','v1 = -INT v2')
-        # self.check('variable_assignment','v1 = FRAC v2')
-        # self.check('variable_assignment','v1 = SQRT v2')
-        # self.check('variable_assignment','v1 = SIN v2')
-        # self.check('variable_assignment','v1 = COS v2')
-        # self.check('variable_assignment','v1 = TAN v2')
-        # self.check('variable_assignment','v1 = CSC v2')
-        # self.check('variable_assignment','v1 = SEC v2')
-        # self.check('variable_assignment','v1 = COT v2')
-        # self.check('variable_assignment','v1 = ARCSIN v2')
-        # self.check('variable_assignment','v1 = ARCCOS v2')
-        # self.check('variable_assignment','v1 = ARCTAN v2')
-        # self.check('variable_assignment','v1 = LOG v2')
-        # self.check('variable_assignment','v1 = EXP v2')
-        # self.check('variable_assignment','v1 = EXPM v2')
-        # self.check('integer_assignment','n1 = MOD n2')
-        # self.check('integer_assignment','n1 = -MOD n2')
+        self.check('variable_assignment','v1 = -MOD v2',
+                   VariableAssignment(Variable(Integer(1)),Negated(Mod(Variable(Integer(2))))))
+        self.check('variable_assignment','v1 = INT 5.6', VariableAssignment(Variable(Integer(1)), Int(Float(5.6))))
+        self.check('variable_assignment','v1 = INT v2',
+                   VariableAssignment(Variable(Integer(1)), Int(Variable(Integer(2)))))
+        self.check('variable_assignment','v1 = -INT v2',
+                   VariableAssignment(Variable(Integer(1)), Negated(Int(Variable(Integer(2))))))
+        self.check('variable_assignment','v1 = FRAC v2',
+                   VariableAssignment(Variable(Integer(1)), Frac(Variable(Integer(2)))))
+        self.check('index_assignment','n1 = MOD n2', IndexAssignment(Index('n1'), Mod(Index('n2'))))
+        self.check('index_assignment','n1 = -MOD n2',
+                   IndexAssignment(Index('n1'), Negated(Mod(Index('n2')))))
 

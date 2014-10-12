@@ -66,7 +66,9 @@ parser AutocodeLineParser:
         {{ return ioperation(iop, index, int_val) if is_op else index }} |
         {{ is_negated = False }} [negate {{ is_negated = True }}] int_negatable
             {{ return Negated(int_negatable) if is_negated else int_negatable }}
-    rule int_negatable:  ( integer {{ return integer }} | mod ( variable | index ) | variable  {{ return variable }} )
+    rule int_negatable:  ( integer {{ return integer }} | mod iv {{ return Mod(iv) }} |
+        variable  {{ return variable }} )
+    rule iv: ( index {{ return index }} | variable {{ return variable }} )
     rule iop: op3 {{ return op3 }} | star {{ return star }}
     rule jump: goto ( int_val | modifier) [',' condition]
     rule condition: [negate] ( (float_val compare [negate] float_val ) | ( int_val compare [negate] int_val) )
