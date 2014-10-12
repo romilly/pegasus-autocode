@@ -33,7 +33,8 @@ parser AutocodeLineParser:
         [label]
         statement [rparen] EOL {{ return 'OK' }}
     rule op: ( op3 {{ return op3 }} | div {{ return div }} )
-    rule statement: ( assignment | print_statement | tape_statement | stop | jump )
+    rule statement: ( assignment {{ return assignment }} | print_statement {{ return print_statement }} |
+        tape_statement  {{ return tape_statement }} | stop {{ return Stop() }} | jump )
     rule print_statement: prt (  index {{ source = index }}  | variable {{ source = variable }} )
             ',' ( spec {{ format = Integer(spec) }} | index {{ format = index }} )
             {{ return Print(source, format) }}

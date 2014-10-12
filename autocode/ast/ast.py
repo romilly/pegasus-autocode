@@ -137,10 +137,15 @@ class VariableAssignment(Element):
         self.variable = variable
         self.value = value
 
+
 class Float(Element):
     def __init__(self, float_string):
-
         self.value = float(float_string)
+
+
+class Stop(Element):
+    pass
+
 
 
 

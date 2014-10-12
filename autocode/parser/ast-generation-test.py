@@ -93,3 +93,6 @@ class AstGenerationTest(unittest.TestCase):
         self.check('index_assignment','n1 = -MOD n2',
                    IndexAssignment(Index('n1'), Negated(Mod(Index('n2')))))
 
+    def test_parses_stop(self):
+        self.check('statement','STOP', Stop())
+

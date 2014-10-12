@@ -69,12 +69,16 @@ class AutocodeLineParser(runtime.Parser):
         _token = self._peek('stop', 'prt', 'tape', 'goto', "'v'", 'INDEX', context=_context)
         if _token in ["'v'", 'INDEX']:
             assignment = self.assignment(_context)
+            return assignment
         elif _token == 'prt':
             print_statement = self.print_statement(_context)
+            return print_statement
         elif _token == 'tape':
             tape_statement = self.tape_statement(_context)
+            return tape_statement
         elif _token == 'stop':
             stop = self._scan('stop', context=_context)
+            return Stop()
         else: # == 'goto'
             jump = self.jump(_context)
 
@@ -159,7 +163,7 @@ class AutocodeLineParser(runtime.Parser):
         _context = self.Context(_parent, self._scanner, 'variable_assignment', [])
         variable = self.variable(_context)
         gets = self._scan('gets', context=_context)
-        _token = self._peek('tapes', 'negate', "'v'", 'function', 'FLOAT', 'rparen', 'INDEX', 'INT', 'EOL', 'compare', 'div', "','", 'gets', 'op3', context=_context)
+        _token = self._peek('tapes', 'negate', "'v'", 'function', 'FLOAT', 'INDEX', 'INT', 'rparen', 'EOL', 'compare', 'div', "','", 'gets', 'op3', context=_context)
         if _token == 'tapes':
             tape_spec = self.tape_spec(_context)
             return MultipleVariableAssignment(variable, tape_spec)
