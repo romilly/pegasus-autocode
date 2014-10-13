@@ -1,4 +1,5 @@
 import unittest
+from autocode.ast.printing import Print
 from autocode.parser import autocode_line
 from autocode.ast.ast import *
 from autocode.ast.functions import *
@@ -77,7 +78,7 @@ class AstGenerationTest(unittest.TestCase):
                    VariableAssignment(Variable(Plus(Integer(5),Index('n7'))),
                         Plus(Variable(Plus(Negated(Integer(7)), Index('n5'))),Variable(Plus(Integer(3),Index('n2'))))))
         
-    def test_parses_functions(self):
+    def test_generates_functions(self):
         self.check('variable_assignment','v1 = MOD v2',
                    VariableAssignment(Variable(Integer(1)),Mod(Variable(Integer(2)))))
         self.check('variable_assignment','v1 = -MOD v2',
@@ -93,6 +94,22 @@ class AstGenerationTest(unittest.TestCase):
         self.check('index_assignment','n1 = -MOD n2',
                    IndexAssignment(Index('n1'), Negated(Mod(Index('n2')))))
 
-    def test_parses_stop(self):
+    def test_generates_stop(self):
         self.check('statement','STOP', Stop())
+
+
+    def test_generates_jumps(self):
+        self.check('jump','^0', Jump(Integer(0)))
+        self.check('jump','^n1', Jump(Index('n1')))
+        self.check('jump','^0, v2 > v3', CJump(Integer(0), GT(Variable(Integer(2)), Variable(Integer(3)))))
+        # self.try_to_parse('^0, v2 > 3.0')
+        # self.try_to_parse('^0, -v2 > 3.0')
+        # self.try_to_parse('^0, v2 > -3.0')
+        # self.try_to_parse('^0, n2 > -3')
+        # self.try_to_parse('^0, n2 = -3')
+        # self.try_to_parse('^0, n2 = -3')
+        # self.try_to_parse('^0, n2 = -3')
+        # self.try_to_parse('^0, n2 = -3')
+        # self.try_to_parse('^0, v1 =* v3')
+        # self.try_to_parse('^(-4 +n8), v1 =* v3')
 

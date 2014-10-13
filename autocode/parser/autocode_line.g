@@ -1,5 +1,6 @@
 from autocode.ast.ast import *
 from autocode.ast.functions import *
+from autocode.ast.printing import Print
 
 %%
 
@@ -27,14 +28,15 @@ parser AutocodeLineParser:
     token rparen: '\)'
     token goto: '\^'
     token stop: 'STOP'
-    token compare: '>=|>|\\=\*|\\=|=\*|='
+    token compare: '>=|>|/=\*|/=|=\*|='
+    token icompare: '>=|>|/=|='
     rule line:
       [lparen]  [special_printing]
         [label]
         statement [rparen] EOL {{ return 'OK' }}
     rule op: ( op3 {{ return op3 }} | div {{ return div }} )
     rule statement: ( assignment {{ return assignment }} | print_statement {{ return print_statement }} |
-        tape_statement  {{ return tape_statement }} | stop {{ return Stop() }} | jump )
+        tape_statement  {{ return tape_statement }} | stop {{ return Stop() }} | jump {{ return jump }} )
     rule print_statement: prt (  index {{ source = index }}  | variable {{ source = variable }} )
             ',' ( spec {{ format = Integer(spec) }} | index {{ format = index }} )
             {{ return Print(source, format) }}
@@ -71,8 +73,13 @@ parser AutocodeLineParser:
         variable  {{ return variable }} )
     rule iv: ( index {{ return index }} | variable {{ return variable }} )
     rule iop: op3 {{ return op3 }} | star {{ return star }}
-    rule jump: goto ( int_val | modifier) [',' condition]
-    rule condition: [negate] ( (float_val compare [negate] float_val ) | ( int_val compare [negate] int_val) )
+    rule jump: {{ is_conditional = False }} goto j_target [',' condition {{ is_conditional = True }} ]
+        {{ return CJump(j_target, condition) if is_conditional else Jump(j_target) }}
+    rule j_target: ( int_val {{ return int_val }} | modifier {{ return modifier }} )
+    rule condition: {{ neg_1 = False; neg_2 = False }}
+        [negate {{ neg_1 = True; neg_2 = False }} ] ( float_val {{ fv1 = float_val }} compare [negate {{ neg_2 = True }} ]
+            float_val {{ return comparison(compare, (Negated(fv1) if neg_1 else fv1), (Negated(float_val) if neg_2 else float_val)) }}  |
+        int_val icompare [negate] int_val)
     rule float: FLOAT {{ return Float(FLOAT) }}
     rule integer: INT {{ return Integer(INT) }}
     rule index: INDEX {{ return Index(INDEX) }}
