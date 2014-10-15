@@ -55,30 +55,39 @@ class Operation(Element):
        self.left = left
        self.right = right
 
-class Plus(Operation):
     def evaluate_in(self, context):
-        sum = self.left.evaluate_in(context) + self.right.evaluate_in(context)
-        return sum
+        return self.operation(self.left.evaluate_in(context),self.right.evaluate_in(context))
+
+
+class Plus(Operation):
+    def operation(self,l,r):
+        return l + r
+
 
 class Minus(Operation):
-    pass
+    def operation(self,l,r):
+        return l - r
 
 
 class Times(Operation):
-    pass
+   def operation(self,l,r):
+        return l * r
 
 
 class Remainder(Operation):
-    pass
+    def operation(self,l,r):
+        return l % r
 
 
 class IDiv(Operation):
-    pass
+    def operation(self,l,r):
+        return l // r
 
 
 class Div(Operation):
-    def evaluate_in(self, context):
-        return self.left.evaluate_in(context) / self.right.evaluate_in(context)
+    def operation(self,l,r):
+        return l / r
+
 
 class ReadProgramTape(Element):
     pass
@@ -159,8 +168,8 @@ class CJump(Element):
 
 
 class GT(Operation):
-    def evaluate_in(self, context):
-     return self.left.evaluate_in(context) > self.right.evaluate_in(context)
+    def operation(self,l,r):
+        return l > r
 
 
 class AE(Operation):
@@ -168,10 +177,12 @@ class AE(Operation):
 
 
 class GE(Operation):
-    pass
+    def operation(self,l,r):
+        return l >= r
 
 class NE(Operation):
-    pass
+    def operation(self,l,r):
+        return l != r
 
 class NAE(Operation):
     pass

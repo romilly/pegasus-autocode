@@ -24,6 +24,6 @@ class Print(Element):
         width = b+c+1
         result += '\n '[a % 2]
         if a > 2:
-            format_string = '%'+('%d.%d' % (width , c))+'F'
+            format_string = '%+'+('%d.%d' % (width , c))+'F'
             result +=  format_string % val
         return result

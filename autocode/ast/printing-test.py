@@ -15,4 +15,4 @@ class PrintTest(unittest.TestCase):
         pr = Print(Float(2.718281),Integer(3026))
         dummy_context = MockContext()
         pr.evaluate_in(dummy_context)
-        self.assertEquals(dummy_context.text, ' 2.718281')
+        self.assertEquals(dummy_context.text, ' +2.718281')

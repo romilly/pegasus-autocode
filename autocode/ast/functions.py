@@ -1,3 +1,4 @@
+from math import sin, cos, tan, asin, atan, acos, log, exp
 from autocode.ast.ast import Element
 
 
@@ -9,83 +10,88 @@ def fun(function, value):
     return fundict[function](value)
 
 
-class Mod(Element):
+class Function(Element):
     def __init__(self, value):
         self.value = value
 
+    def evaluate_in(self, context):
+        self.function(self.value.evaluate_in(context))
 
-class Int(Element):
-    def __init__(self, value):
-        self.value = value
-
-
-class Frac(Element):
-    def __init__(self, value):
-        self.value = value
+class Mod(Function):
+    def function(self, x):
+        return abs(x)
 
 
-class Sqrt(Element):
-    def __init__(self, value):
-        self.value = value
+class Int(Function):
+    def function(self, x):
+        return int(x)
 
 
-class Sin(Element):
-    def __init__(self, value):
-        self.value = value
+class Frac(Function):
+    def function(self, x):
+        return x - int(x)
 
 
-class Cos(Element):
-    def __init__(self, value):
-        self.value = value
-
-class Tan(Element):
-    def __init__(self, value):
-        self.value = value
+class Sqrt(Function):
+    def function(self, x):
+        return x**0.5
 
 
-class Cosec(Element):
-    def __init__(self, value):
-        self.value = value
+class Sin(Function):
+    def function(self, x):
+        return sin(x)
 
 
-class Sec(Element):
-    def __init__(self, value):
-        self.value = value
+class Cos(Function):
+    def function(self, x):
+        return cos(x)
+
+class Tan(Function):
+    def function(self, x):
+        return tan(x)
 
 
-class Cot(Element):
-    def __init__(self, value):
-        self.value = value
+class Cosec(Function):
+    def function(self, x):
+        return 1/cos(x)
 
 
-class Arcsin(Element):
-    def __init__(self, value):
-        self.value = value
+class Sec(Function):
+    def function(self, x):
+        return 1/sin(x)
 
 
-class Arccos(Element):
-    def __init__(self, value):
-        self.value = value
+class Cot(Function):
+    def function(self, x):
+        return 1/tan(x)
+
+class Arcsin(Function):
+    def function(self, x):
+        return asin(x)
 
 
-class Arctan(Element):
-    def __init__(self, value):
-        self.value = value
+class Arccos(Function):
+   def function(self, x):
+        return acos(x)
 
 
-class Log(Element):
-    def __init__(self, value):
-        self.value = value
+class Arctan(Function):
+    def function(self, x):
+        return atan(x)
+
+class Log(Function):
+    def function(self, x):
+        return log(x)
 
 
-class Exp(Element):
-    def __init__(self, value):
-        self.value = value
+class Exp(Function):
+    def function(self, x):
+        return exp(x)
 
 
-class Expm(Element):
-    def __init__(self, value):
-        self.value = value
+class Expm(Function):
+    def function(self, x):
+        return exp(-x)
 
 
 
