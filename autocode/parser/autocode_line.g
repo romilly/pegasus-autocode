@@ -7,7 +7,7 @@ from autocode.ast.printing import Print
 parser AutocodeLineParser:
     ignore: '\s'
     token EOL: '$'
-    token INDEX: 'n[0-9][0-9]?'
+    token INDEX: '[0-9][0-9]?'
     token mod: 'MOD'
     token function: 'MOD|INT|FRAC|SQRT|SIN|COS|TAN|CSC|SEC|COT|ARCSIN|ARCCOS|ARCTAN|LOG|EXPM|EXP'
     token special_printing: 'XP|X|SP|S'
@@ -82,4 +82,4 @@ parser AutocodeLineParser:
         int_val icompare [negate] int_val)
     rule float: FLOAT {{ return Float(FLOAT) }}
     rule integer: INT {{ return Integer(INT) }}
-    rule index: INDEX {{ return Index(INDEX) }}
+    rule index: 'n' INDEX {{ return Index(INDEX) }}

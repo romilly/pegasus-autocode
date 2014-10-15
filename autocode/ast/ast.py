@@ -31,8 +31,11 @@ class Integer(Element):
 
 
 class Index(Element):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, index):
+        self.index = int(index)
+
+    def name(self):
+        return "n%d" % self.index
 
     def evaluate_in(self, context):
         return context.get(self.name)
