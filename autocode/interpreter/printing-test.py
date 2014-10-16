@@ -1,6 +1,7 @@
 import unittest
-from autocode.ast.ast import Float, Integer
-from autocode.ast.printing import Print
+from autocode.interpreter.ast import Float, Integer
+from autocode.interpreter.printing import Print
+
 
 class MockContext():
     def __init__(self):

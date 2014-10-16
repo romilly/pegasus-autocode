@@ -1,4 +1,4 @@
-from autocode.ast.ast import Element
+from autocode.interpreter.ast import Element
 
 
 class Print(Element):

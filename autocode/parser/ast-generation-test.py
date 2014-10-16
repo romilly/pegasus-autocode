@@ -1,8 +1,8 @@
 import unittest
-from autocode.ast.printing import Print
+from autocode.interpreter.printing import Print
 from autocode.parser import autocode_line
-from autocode.ast.ast import *
-from autocode.ast.functions import *
+from autocode.interpreter.ast import *
+from autocode.interpreter.functions import *
 
 
 class AstGenerationTest(unittest.TestCase):

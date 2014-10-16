@@ -1,8 +1,8 @@
 import unittest
 import cStringIO
-from autocode.ast.ast import *
-from autocode.ast.printing import Print
-from autocode.ast.progam import Program, Line
+from autocode.interpreter.ast import *
+from autocode.interpreter.printing import Print
+from autocode.interpreter.progam import Program, Line
 from autocode.interpreter.pegasus import Pegasus
 
 

@@ -34,8 +34,14 @@ class Index(Element):
     def __init__(self, index):
         self.index = int(index)
 
+    def name_for_index_numbered(self, number):
+        return "n%d" % number
+
     def name(self):
-        return "n%d" % self.index
+        return self.name_for_index_numbered(self.index)
+
+    def number_in(self, context):
+         return self.index
 
     def evaluate_in(self, context):
         return context.get(self.name)
@@ -103,15 +109,15 @@ class ReadDataTape(Element):
 
 
 class MultipleIndexAssignment(Element):
-    def __init__(self, index, value):
+    def __init__(self, index, source):
         self.index = index
-        self.value = value
+        self.source = source
 
 
 class MultipleVariableAssignment(Element):
-    def __init__(self, variable, value):
+    def __init__(self, variable, source):
         self.variable = variable
-        self.value = value
+        self.source = source
 
 
 class MaxInt(Element):
@@ -126,8 +132,14 @@ class Variable(Element):
     def evaluate_in(self, context):
         return context.get(self.name_in(context))
 
+    def number_in(self, context):
+        return self.id.evaluate_in(context)
+
+    def name_for_variable_numbered(self, number):
+        return 'v%d' % number
+
     def name_in(self, context):
-        return 'v%d' % self.id.evaluate_in(context)
+        return self.name_for_variable_numbered(self.number_in(context))
 
 
 class VariableAssignment(Element):

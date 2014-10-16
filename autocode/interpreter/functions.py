@@ -1,5 +1,5 @@
 from math import sin, cos, tan, asin, atan, acos, log, exp
-from autocode.ast.ast import Element
+from autocode.interpreter.ast import Element
 
 
 def fun(function, value):

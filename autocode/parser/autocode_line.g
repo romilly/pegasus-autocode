@@ -1,6 +1,6 @@
-from autocode.ast.ast import *
-from autocode.ast.functions import *
-from autocode.ast.printing import Print
+from autocode.interpreter.ast import *
+from autocode.interpreter.functions import *
+from autocode.interpreter.printing import Print
 
 %%
 
